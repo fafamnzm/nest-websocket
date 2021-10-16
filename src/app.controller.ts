@@ -1,4 +1,5 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
+import { LoginDto } from './app.dto';
 import { AppService } from './app.service';
 
 @Controller()
@@ -8,5 +9,10 @@ export class AppController {
   @Get()
   getHello(): string {
     return this.appService.getHello();
+  }
+
+  @Post()
+  login(@Body() body: LoginDto): Promise<string> {
+    return this.appService.login(body);
   }
 }
