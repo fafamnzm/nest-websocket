@@ -11,7 +11,7 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Post()
+  @Post('login')
   login(@Body() body: LoginDto): Promise<string> {
     return this.appService.login(body);
   }

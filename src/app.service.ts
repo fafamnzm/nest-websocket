@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import { LoginDto } from './app.dto';
 import {
@@ -20,18 +20,18 @@ export class AppService {
       const password = body.password;
 
       const checkEmail = validateEmail(email);
-      if (!checkEmail) throw new Error('Invalid credentials');
+      if (!checkEmail) throw new ForbiddenException('Invalid credentials');
 
       const user = findUser(email);
-      if (!user) throw new Error('Invalid credentials');
+      if (!user) throw new ForbiddenException('Invalid credentials');
 
       const checkPassword = await validatePassword(password, user);
-      if (!checkPassword) throw new Error('Invalid credentials');
+      if (!checkPassword) throw new ForbiddenException('Invalid credentials');
 
       const token = generateToken(user);
       return token;
     } catch (err) {
-      console.error({ err });
+      throw err;
     }
   }
 }
