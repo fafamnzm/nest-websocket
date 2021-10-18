@@ -12,11 +12,12 @@ import {
 import { Socket, Server } from 'socket.io';
 import { ChatDto } from './app.dto';
 
-export const chats:Array<ChatDto> = [];
+export const chats: Array<ChatDto> = [];
 
 @WebSocketGateway()
 export class AppGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 

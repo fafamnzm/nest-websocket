@@ -24,6 +24,8 @@
 
 ## Description
 
+A simple chat app using websocket in nest with some tests
+
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
 ## Installation
