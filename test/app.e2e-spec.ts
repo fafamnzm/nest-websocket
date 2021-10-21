@@ -1,24 +1,64 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { Test } from '@nestjs/testing';
+import { Utils } from './middlewares/utils';
+import { AppModule } from '../src/app.module';
+import { SocketService } from './middlewares/socket.service';
+import { observe } from 'rxjs-marbles/jest';
+import { tap, take } from 'rxjs/operators';
 
-describe('AppController (e2e)', () => {
-  let app: INestApplication;
+describe('Events', () => {
+  let socket: SocketService;
 
   beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+    const testingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
+    await Utils.startServer(testingModule);
+    //? each test need a new socket connection
+    socket = await Utils.createSocket();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  afterEach(async () => {
+    //? each test need to release the connection for next
+    await Utils.closeApp();
+  });
+
+  describe('should return a correct event using observe', () => {
+    it(
+      'when socket is connected',
+      observe(() =>
+        socket.once('connect').pipe(
+          tap(() => {
+            expect(true).toBeTruthy();
+          }),
+        ),
+      ),
+    );
+
+    it(
+      'when socket send normal data',
+      observe(() => {
+        socket
+          .once('connect')
+          .pipe(tap(() => socket.emit('message', 'test')))
+          .subscribe();
+
+        return socket.on('message').pipe(
+          take(1),
+          tap((data) => {
+            expect(data?.data).toMatch('Client Connected');
+          }),
+        );
+      }),
+    );
+  });
+
+  describe('should return a correct event using toPromise', () => {
+    it('when socket is connected', () => {
+      return socket
+        .once('connect')
+        .pipe(tap(() => expect(true).toBeTruthy()))
+        .toPromise();
+    });
   });
 });
